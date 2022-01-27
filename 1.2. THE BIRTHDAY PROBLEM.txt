@@ -1,0 +1,98 @@
+Code: The birthday problem
+# checking for duplicated bdays in one 50 person group
+
+
+n <- 50
+bdays <- sample(1:365, n, replace = TRUE)    # generate n random birthdays
+any(duplicated(bdays))    # check if any birthdays are duplicated
+
+# Monte Carlo simulation with B=10000 replicates
+B <- 10000
+results <- replicate(B, {    # returns vector of B logical values
+    bdays <- sample(1:365, n, replace = TRUE)
+    any(duplicated(bdays))
+})
+mean(results)    # calculates proportion of groups with duplicated bdays
+
+[1] 0.9702
+
+
+
+# Code: Function for birthday problem Monte Carlo simulations
+> # function to calculate probability of shared bdays across n people
+
+
+> compute_prob <- function(n, B = 10000) {
++   same_day <- replicate(B, {
++     bdays <- sample(1:365, n, replace = TRUE)
++     any(duplicated(bdays))
++   })
++   mean(same_day)
++ }
+> n <- seq(1, 60)
+> n
+ [1]  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29
+[30] 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58
+[59] 59 60
+
+
+# Code: Element-wise operation over vectors and sapply
+> x <- 1:10
+> sqrt(x)    # sqrt operates on each element of the vector
+ [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427 3.000000
+[10] 3.162278
+> y <- 1:10
+> x*y    # * operates element-wise on both vectors
+ [1]   1   4   9  16  25  36  49  64  81 100
+> compute_prob(n)    # does not iterate over the vector n without sapply
+[1] 0
+> x <- 1:10
+> sapply(x, sqrt)    # this is equivalent to sqrt(x)
+ [1] 1.000000 1.414214 1.732051 2.000000 2.236068 2.449490 2.645751 2.828427 3.000000
+[10] 3.162278
+> prob <- sapply(n, compute_prob)    # element-wise application of compute_prob to n
+> plot(n, prob)
+> plot(n, prob)
+
+
+> # Code: Computing birthday problem probabilities with sapply
+> # function for computing exact probability of shared birthdays for any n
+> exact_prob <- function(n){
++   prob_unique <- seq(365, 365-n+1)/365   # vector of fractions for mult. rule
++   1 - prod(prob_unique)    # calculate prob of no shared birthdays and subtract from 1
++ }
+> # applying function element-wise to vector of n values
+> eprob <- sapply(n, exact_prob)
+> # plotting Monte Carlo results and exact probabilities on same graph
+> plot(n, prob)    # plot Monte Carlo results
+> lines(n, eprob, col = "red")    # add line for exact prob
+
+
+# HOW MANY MONTE CARLO EXPERIMENTS ARE ENOUGH?
+# The larger the number of Monte Carlo replicates  B , the more accurate the estimate.
+# Determining the appropriate size for  B  can require advanced statistics.
+# One practical approach is to try many sizes for  B  and look for sizes that provide 
+# stable estimates.
+
+# Code: Estimating a practical value of B
+# This code runs Monte Carlo simulations to estimate the probability of shared birthdays 
+# using several B values and plots the results. When B is large enough that the estimated 
+# probability stays stable, then we have selected a useful value of B.
+
+B <- 10^seq(1, 5, len = 100)    # defines vector of many B values
+compute_prob <- function(B, n = 22){    # function to run Monte Carlo simulation with each B
+  same_day <- replicate(B, {
+    bdays <- sample(1:365, n, replace = TRUE)
+    any(duplicated(bdays))
+  })
+  mean(same_day)
+}
+
+prob <- sapply(B, compute_prob)    # apply compute_prob to many values of B
+plot(log10(B), prob, type = "l")    # plot a line graph of estimates 
+
+
+
+
+
+
